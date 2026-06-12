@@ -1,0 +1,34 @@
+{
+  "name": "brier-score-predictor",
+  "version": "0.1.0",
+  "description": "A local Windows app for tracking probabilistic predictions and Brier score calibration.",
+  "author": "Local",
+  "main": "src/main.js",
+  "private": true,
+  "scripts": {
+    "start": "..\\dossier-desk\\node_modules\\.bin\\electron.cmd .",
+    "build:folder": "set ELECTRON_BUILDER_CACHE=%CD%\\.builder-cache&& ..\\dossier-desk\\node_modules\\.bin\\electron-builder.cmd --win dir --config.npmRebuild=false",
+    "build:package": "set ELECTRON_BUILDER_CACHE=%CD%\\.builder-cache&& ..\\dossier-desk\\node_modules\\.bin\\electron-builder.cmd --win portable --config.npmRebuild=false",
+    "build:win": "npm run build:package"
+  },
+  "build": {
+    "appId": "com.local.brierscorepredictor",
+    "productName": "Brier Score Predictor",
+    "electronVersion": "32.3.3",
+    "electronDist": "../dossier-desk/node_modules/electron/dist",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        "portable"
+      ]
+    }
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Brier Score Predictor</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">B</span>
+        <div>
+          <strong>Forecast Lab</strong>
+          <small>Brier score workspace</small>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Main navigation">
+        <button class="nav-button active" data-view="dashboard"><span>01</span>Dashboard</button>
+        <button class="nav-button" data-view="predictions"><span>02</span>Predictions</button>
+        <button class="nav-button" data-view="calibration"><span>03</span>Calibration</button>
+      </nav>
+
+      <div class="storage-note">
+        <span>Storage</span>
+        <strong id="dataPath">Local app data</strong>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">Forecast Lab</span>
+          <h1 id="viewTitle">Dashboard</h1>
+          <p id="viewSubtitle">Track probability forecasts, resolve outcomes, and learn whether your confidence is calibrated.</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="secondary" id="exportCsv">Export CSV</button>
+          <button class="primary" id="newPrediction">New prediction</button>
+        </div>
+      </header>
+
+      <section class="view active" id="view-dashboard">
+        <div class="metric-grid">
+          <article class="metric-card metric-primary">
+            <span>Resolved Brier score</span>
+            <strong id="brierScore">0.000</strong>
+            <small id="brierLabel">Lower is better</small>
+          </article>
+          <article class="metric-card metric-green">
+            <span>Skill vs 50%</span>
+            <strong id="skillScore">0%</strong>
+            <small>Positive means better than guessing half</small>
+          </article>
+          <article class="metric-card metric-amber">
+            <span>Resolved</span>
+            <strong id="resolvedCount">0</strong>
+            <small id="openCount">0 open</small>
+          </article>
+          <article class="metric-card metric-coral">
+            <span>Accuracy</span>
+            <strong id="accuracyScore">0%</strong>
+            <small>Using 50% as the decision line</small>
+          </article>
+        </div>
+
+        <div class="dashboard-grid">
+          <section class="panel">
+            <div class="panel-heading">
+              <h2>Recent predictions</h2>
+              <button class="secondary small" data-jump="predictions">View all</button>
+            </div>
+            <div id="recentList" class="list compact-list"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <h2>Score by category</h2>
+            </div>
+            <div id="categoryScores" class="score-stack"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-predictions">
+        <div class="split">
+          <section class="panel list-panel">
+            <div class="panel-heading">
+              <h2>Prediction log</h2>
+              <input id="searchInput" type="search" placeholder="Search predictions">
+            </div>
+            <div class="filter-row" role="group" aria-label="Prediction filter">
+              <button class="filter active" data-filter="all">All</button>
+              <button class="filter" data-filter="open">Open</button>
+              <button class="filter" data-filter="resolved">Resolved</button>
+            </div>
+            <div id="predictionList" class="list"></div>
+          </section>
+
+          <section class="panel detail-panel">
+            <div class="panel-heading">
+              <h2>Prediction details</h2>
+              <button class="danger ghost" id="deletePrediction">Delete</button>
+            </div>
+            <label>Question<input id="questionInput" placeholder="Will this happen?"></label>
+            <div class="form-grid">
+              <label>Probability <span id="probabilityReadout">60%</span><input id="probabilityInput" type="range" min="1" max="99" value="60"></label>
+              <label>Category<input id="categoryInput" placeholder="Work, markets, hiring"></label>
+            </div>
+            <label>Outcome<select id="outcomeInput">
+              <option value="">Open</option>
+              <option value="1">Happened</option>
+              <option value="0">Did not happen</option>
+            </select></label>
+            <label>Notes<textarea id="notesInput" rows="7" placeholder="Evidence, base rates, assumptions, or what changed."></textarea></label>
+            <div class="score-preview" id="scorePreview"></div>
+
+            <section class="auto-adjuster">
+              <div>
+                <span class="muted">Bayesian auto-adjuster</span>
+                <strong id="adjusterSuggestion">Add notes or evidence to update the probability automatically.</strong>
+                <small id="adjusterReason">The adjuster treats your current probability as the prior, weighs new evidence, and updates the score after you pause typing.</small>
+              </div>
+            </section>
+
+            <section class="evidence-feed">
+              <div class="panel-heading feed-heading">
+                <div>
+                  <h2>Evidence feed</h2>
+                  <span class="muted">Search recent news and fold evidence into the forecast.</span>
+                </div>
+                <button class="secondary small" id="useQuestionSearch">Use question</button>
+              </div>
+              <div class="feed-controls">
+                <input id="newsQueryInput" type="search" placeholder="Search news evidence">
+                <select id="newsSourceInput">
+                  <option value="all">All sources</option>
+                  <option value="reuters.com">Reuters</option>
+                  <option value="apnews.com">Associated Press</option>
+                  <option value="bbc.">BBC</option>
+                  <option value="npr.org">NPR</option>
+                  <option value="bloomberg.com">Bloomberg</option>
+                </select>
+                <button class="primary" id="searchNews">Search</button>
+              </div>
+              <div id="newsStatus" class="feed-status">Search results appear here.</div>
+              <div id="newsResults" class="news-results"></div>
+            </section>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-calibration">
+        <div class="panel">
+          <div class="panel-heading">
+            <h2>Calibration buckets</h2>
+            <span class="muted">Resolved predictions only</span>
+          </div>
+          <div id="calibrationBuckets" class="bucket-grid"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
